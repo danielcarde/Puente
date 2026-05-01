@@ -1,85 +1,823 @@
 
 <!-- Google Maps API key is loaded dynamically from ./src/keys.js -->
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--font-sans);color:var(--color-text-primary);background:transparent}
-  .app{max-width:700px;margin:0 auto;padding:0 0 2rem}
-  .nav{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem}
-  .nav-btn{padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--color-text-secondary);transition:all .15s}
-  .nav-btn.active{border-bottom-color:var(--color-text-primary);color:var(--color-text-primary)}
-  .nav-btn:hover:not(.active){color:var(--color-text-primary)}
-  .tab{display:none}
-  .tab.active{display:block}
-  .hero{padding:1.5rem 0 1rem}
-  .badge{display:inline-flex;align-items:center;gap:6px;background:var(--color-background-success);color:var(--color-text-success);font-size:11px;font-weight:500;padding:4px 10px;border-radius:var(--border-radius-md);margin-bottom:1rem;letter-spacing:.04em}
-  .hero h1{font-size:28px;font-weight:500;line-height:1.25;margin-bottom:.75rem}
-  .hero h1 span{color:var(--color-text-success)}
-  .hero p{font-size:15px;color:var(--color-text-secondary);line-height:1.7;max-width:580px;margin-bottom:1.25rem}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:1.25rem 0}
-  .stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.85rem 1rem}
-  .stat-n{font-size:22px;font-weight:500;margin-bottom:2px}
-  .stat-l{font-size:12px;color:var(--color-text-secondary);line-height:1.4}
-  .section-title{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--color-text-secondary);text-transform:uppercase;margin-bottom:1rem}
-  .how-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
-  .how-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.1rem}
-  .how-card .icon{width:28px;height:28px;border-radius:var(--border-radius-md);background:var(--color-background-info);display:flex;align-items:center;justify-content:center;margin-bottom:.65rem;font-size:14px}
-  .how-card h4{font-size:13px;font-weight:500;margin-bottom:4px}
-  .how-card p{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
-  .tech-bar{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
-  .tech-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:.6rem}
-  .pill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:var(--border-radius-md);background:var(--color-background-info);color:var(--color-text-info)}
-  .chat-wrap{display:flex;flex-direction:column;height:480px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)}
-  .chat-head{padding:.85rem 1.1rem;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
-  .chat-head-left{display:flex;align-items:center;gap:10px}
-  .avatar{width:32px;height:32px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--color-text-success)}
-  .chat-head h3{font-size:14px;font-weight:500}
-  .chat-head p{font-size:11px;color:var(--color-text-secondary)}
-  .lang-toggle{display:flex;gap:4px}
-  .lang-btn{font-size:11px;padding:3px 9px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:none;cursor:pointer;color:var(--color-text-secondary)}
-  .lang-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
-  .messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
-  .msg{display:flex;gap:8px;align-items:flex-end}
-  .msg.user{flex-direction:row-reverse}
-  .msg-bubble{max-width:80%;padding:.6rem .85rem;border-radius:var(--border-radius-lg);font-size:13px;line-height:1.55}
-  .msg.bot .msg-bubble{background:var(--color-background-secondary);color:var(--color-text-primary);border-bottom-left-radius:4px}
-  .msg.user .msg-bubble{background:var(--color-background-info);color:var(--color-text-info);border-bottom-right-radius:4px}
-  .msg-avatar{width:24px;height:24px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--color-text-success);flex-shrink:0}
-  .typing{display:flex;align-items:center;gap:4px;padding:.6rem .85rem;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border-bottom-left-radius:4px;width:fit-content}
-  .dot{width:6px;height:6px;border-radius:50%;background:var(--color-text-secondary);animation:blink 1.4s infinite both}
-  .dot:nth-child(2){animation-delay:.2s}
-  .dot:nth-child(3){animation-delay:.4s}
-  @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
-  .quick-btns{padding:.65rem 1rem;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:6px;flex-wrap:wrap}
-  .quick-btn{font-size:11px;padding:5px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:none;cursor:pointer;color:var(--color-text-secondary);white-space:nowrap;transition:background .1s}
-  .quick-btn:hover{background:var(--color-background-secondary)}
-  .input-row{display:flex;gap:8px;padding:.75rem 1rem;border-top:0.5px solid var(--color-border-tertiary)}
-  .chat-input{flex:1;padding:8px 12px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);outline:none;font-family:var(--font-sans)}
-  .chat-input:focus{border-color:var(--color-border-primary)}
-  .send-btn{padding:8px 16px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
-  .send-btn:disabled{opacity:.45;cursor:not-allowed}
-  .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
-  .res-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.1rem;cursor:pointer;transition:border-color .15s}
-  .res-card:hover{border-color:var(--color-border-primary)}
-  .res-icon{font-size:18px;margin-bottom:.5rem}
-  .res-card h4{font-size:13px;font-weight:500;margin-bottom:3px}
-  .res-card p{font-size:12px;color:var(--color-text-secondary);line-height:1.45;margin-bottom:.6rem}
-  .res-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .tag{font-size:10px;padding:2px 7px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-secondary)}
-  .bilingual-tag{font-size:10px;padding:2px 7px;border-radius:var(--border-radius-md);background:var(--color-background-success);color:var(--color-text-success)}
-  .filter-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
-  .filter-btn{font-size:12px;padding:5px 12px;border:0.5px solid var(--color-border-secondary);border-radius:20px;background:none;cursor:pointer;color:var(--color-text-secondary);transition:all .1s}
-  .filter-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary)}
-  .pitch-block{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
-  .pitch-head{padding:.75rem 1.1rem;background:var(--color-background-secondary);font-size:12px;font-weight:500;color:var(--color-text-secondary);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
-  .pitch-body{padding:1rem 1.1rem;font-size:13px;line-height:1.7;color:var(--color-text-secondary);border-top:0.5px solid var(--color-border-tertiary);display:none}
-  .pitch-body.open{display:block}
-  .pitch-body strong{color:var(--color-text-primary);font-weight:500}
-  .arch-row{display:flex;align-items:center;gap:8px;margin-bottom:.5rem;font-size:13px}
-  .arch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  :root {
+    color-scheme: light;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --bg: #eff5fb;
+    --surface: #ffffff;
+    --surface-soft: #f7fbff;
+    --text: #111827;
+    --muted: #64748b;
+    --accent: #0f766e;
+    --accent-soft: #dbefe8;
+    --border: rgba(15, 23, 42, 0.12);
+    --color-background-success: rgba(15, 118, 110, 0.12);
+    --color-text-success: #0f766e;
+    --color-text-secondary: #64748b;
+    --color-border-tertiary: rgba(15, 23, 42, 0.12);
+    --color-border-secondary: rgba(148, 163, 184, 0.28);
+    --color-border-primary: rgba(15, 118, 110, 0.35);
+    --color-background-secondary: #f7fbff;
+    --color-background-info: rgba(15, 118, 110, 0.08);
+    --color-text-info: #0f766e;
+    --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    --radius: 24px;
+    --radius-md: 18px;
+    --radius-sm: 14px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    background-image: linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)),
+      radial-gradient(circle at top left, rgba(79, 173, 196, 0.18), transparent 36%),
+      radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.18), transparent 30%),
+      url('El_Paso_Cityscape_(cropped).jpg');
+    background-size: cover, auto, auto, cover;
+    background-position: center center, left top, right bottom, center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: inherit;
+    line-height: 1.6;
+    padding: 2rem 1rem 3rem;
+  }
+
+  body.dark-mode {
+    color-scheme: dark;
+    background-image: linear-gradient(rgba(8, 17, 26, 0.84), rgba(8, 17, 26, 0.84)),
+      radial-gradient(circle at top left, rgba(79, 173, 196, 0.12), transparent 36%),
+      radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.12), transparent 30%),
+      url('El_Paso_Cityscape_(cropped).jpg');
+    background-size: cover, auto, auto, cover;
+    background-position: center center, left top, right bottom, center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #e2e8f0;
+  }
+
+  body.dark-mode .app {
+    background: rgba(15, 23, 42, 0.86);
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.45);
+  }
+
+  body.dark-mode .hero,
+  body.dark-mode .tech-bar,
+  body.dark-mode .pitch-block,
+  body.dark-mode .how-card,
+  body.dark-mode .res-card,
+  body.dark-mode .chat-wrap {
+    background: #111827;
+    border-color: rgba(148, 163, 184, 0.18);
+  }
+
+  body.dark-mode .badge {
+    background: rgba(56, 189, 248, 0.14);
+    color: #7dd3fc;
+  }
+
+  body.dark-mode .nav-btn {
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .nav-btn.active,
+  body.dark-mode .nav-btn:hover {
+    background: rgba(56, 189, 248, 0.12);
+    color: #bae6fd;
+    border-color: rgba(56, 189, 248, 0.25);
+  }
+
+  body.dark-mode .hero p,
+  body.dark-mode .stat-l,
+  body.dark-mode .pitch-body,
+  body.dark-mode .how-card p,
+  body.dark-mode .res-card p,
+  body.dark-mode .chat-head p {
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .chat-input {
+    background: #1e293b;
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #e2e8f0;
+  }
+
+  body.dark-mode .chat-input:focus {
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+  }
+
+  body.dark-mode .send-btn {
+    background: #38bdf8;
+    color: #0f172a;
+  }
+
+  body.dark-mode .quick-btn,
+  body.dark-mode .filter-btn {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .quick-btn:hover {
+    background: #111827;
+  }
+
+  body.dark-mode .filter-btn.active {
+    background: rgba(56, 189, 248, 0.12);
+  }
+
+  body.dark-mode .messages {
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  }
+
+  body.dark-mode .msg.bot .msg-bubble {
+    background: #111827;
+    color: #e2e8f0;
+  }
+
+  body.dark-mode .msg.user .msg-bubble {
+    background: rgba(56, 189, 248, 0.14);
+    color: #e2e8f0;
+  }
+
+  body.dark-mode .chat-head {
+    background: transparent;
+  }
+
+  body.dark-mode .avatar {
+    background: rgba(56, 189, 248, 0.16);
+    color: #7dd3fc;
+  }
+
+  body.dark-mode .quick-btns {
+    border-top-color: rgba(148, 163, 184, 0.18);
+  }
+
+  body.dark-mode .quick-btn {
+    background: #111827;
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .filter-btn {
+    background: #111827;
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .filter-btn.active {
+    background: rgba(56, 189, 248, 0.12);
+    color: #bae6fd;
+  }
+
+  body.dark-mode .pitch-head {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+
+  body.dark-mode .pitch-body {
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .tag {
+    background: rgba(148, 163, 184, 0.16);
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .bilingual-tag {
+    background: rgba(56, 189, 248, 0.12);
+    color: #7dd3fc;
+  }
+
+  body.dark-mode .stat,
+  body.dark-mode .tech-bar,
+  body.dark-mode .how-card,
+  body.dark-mode .res-card {
+    background: #111827;
+  }
+
+  body.dark-mode .pitch-head:hover {
+    background: rgba(56, 189, 248, 0.08);
+  }
+
+  body.dark-mode .pitch-head span {
+    color: #94a3b8;
+  }
+
+  body.dark-mode .stat-l,
+  body.dark-mode .section-title,
+  body.dark-mode .pitch-head,
+  body.dark-mode .how-card p,
+  body.dark-mode .res-card p,
+  body.dark-mode .chat-head p,
+  body.dark-mode .hero p {
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .tech-pills .pill {
+    background: rgba(56, 189, 248, 0.08);
+    color: #7dd3fc;
+  }
+
+  body.dark-mode .theme-btn:hover {
+    background: rgba(56, 189, 248, 0.12);
+  }
+
+  body.dark-mode .theme-btn {
+    background: #111827;
+    border-color: rgba(148, 163, 184, 0.22);
+    color: #cbd5e1;
+  }
+
+  .app {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+  }
+
+  .hero,
+  .tech-bar,
+  .pitch-block,
+  .how-card,
+  .res-card,
+  .chat-wrap {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .nav-btn {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .nav-btn.active,
+  .nav-btn:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: rgba(15, 118, 110, 0.18);
+  }
+
+  .tab {
+    display: none;
+  }
+
+  .tab.active {
+    display: block;
+  }
+
+  .hero {
+    padding: 1.75rem 1.75rem 1.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.04);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(15, 118, 110, 0.12);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+  }
+
+  .hero p {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 680px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.75rem 0;
+  }
+
+  .stat {
+    padding: 1rem 1.15rem;
+    background: var(--surface-soft);
+    border-radius: var(--radius-sm);
+  }
+
+  .stat-n {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+
+  .stat-l {
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+
+  .section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .how-card {
+    padding: 1.25rem 1.3rem;
+    min-height: 170px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  }
+
+  .how-card .icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    margin-bottom: 0.85rem;
+  }
+
+  .how-card h4 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .how-card p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .tech-bar {
+    padding: 1.25rem 1.4rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.04);
+  }
+
+  .tech-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+
+  .pill {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.08);
+    color: var(--accent);
+  }
+
+  .chat-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 540px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+
+  .chat-head {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .chat-head-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-head h3 {
+    font-size: 1rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .chat-head p {
+    color: var(--muted);
+    font-size: 0.84rem;
+  }
+
+  .lang-toggle {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .lang-btn {
+    font-size: 0.82rem;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .lang-btn.active {
+    background: var(--accent);
+    border-color: rgba(15, 118, 110, 0.18);
+    color: #fff;
+  }
+
+  .theme-btn {
+    font-size: 0.82rem;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .theme-btn:hover {
+    background: rgba(15, 118, 110, 0.08);
+  }
+
+  body.dark-mode .lang-btn {
+    border-color: rgba(148, 163, 184, 0.22);
+    color: #cbd5e1;
+  }
+
+  body.dark-mode .lang-btn.active {
+    background: rgba(56, 189, 248, 0.16);
+    border-color: rgba(56, 189, 248, 0.22);
+    color: #e2e8f0;
+  }
+
+  body.dark-mode .theme-btn {
+    border-color: rgba(148, 163, 184, 0.22);
+    color: #cbd5e1;
+    background: #111827;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 1.2rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(241,248,255,1) 100%);
+  }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .msg.user {
+    flex-direction: row-reverse;
+  }
+
+  .msg-bubble {
+    max-width: 78%;
+    padding: 0.8rem 1rem;
+    border-radius: 20px;
+    font-size: 0.96rem;
+    line-height: 1.7;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  }
+
+  .msg.bot .msg-bubble {
+    background: #f8fbff;
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg.user .msg-bubble {
+    background: var(--accent-soft);
+    color: var(--text);
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.7rem 0.85rem;
+    background: rgba(15, 118, 110, 0.08);
+    border-radius: 18px;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: blink 1.4s infinite both;
+  }
+
+  .quick-btns {
+    padding: 1rem 1.2rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .quick-btn {
+    font-size: 0.86rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  }
+
+  .quick-btn:hover {
+    background: var(--surface-soft);
+    transform: translateY(-1px);
+    border-color: rgba(15, 118, 110, 0.2);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.85rem;
+    padding: 1rem 1.2rem 1.25rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .chat-input {
+    flex: 1;
+    padding: 0.95rem 1rem;
+    font-size: 0.95rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 16px;
+    background: #f8fafc;
+    color: var(--text);
+    outline: none;
+  }
+
+  .chat-input:focus {
+    border-color: rgba(15, 118, 110, 0.35);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.08);
+  }
+
+  .send-btn {
+    padding: 0.95rem 1.2rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .res-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .res-card {
+    padding: 1.25rem 1.2rem;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .res-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(15, 118, 110, 0.2);
+    box-shadow: 0 18px 38px rgba(15, 23, 42, 0.06);
+  }
+
+  .res-card h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .res-card p {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .res-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+  }
+
+  .tag,
+  .bilingual-tag {
+    font-size: 0.78rem;
+    padding: 5px 10px;
+    border-radius: 999px;
+  }
+
+  .tag {
+    background: #eef2ff;
+    color: #334155;
+  }
+
+  .bilingual-tag {
+    background: rgba(15, 118, 110, 0.12);
+    color: var(--accent);
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .filter-btn {
+    font-size: 0.88rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .filter-btn.active {
+    background: rgba(15, 118, 110, 0.12);
+    color: var(--accent);
+    border-color: rgba(15, 118, 110, 0.18);
+  }
+
+  .pitch-block {
+    overflow: hidden;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.04);
+  }
+
+  .pitch-head {
+    padding: 1rem 1.25rem;
+    background: var(--surface-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background 0.18s ease;
+  }
+
+  .pitch-head:hover {
+    background: rgba(15, 118, 110, 0.05);
+  }
+
+  .pitch-head span {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .pitch-body {
+    padding: 1.2rem 1.25rem;
+    color: var(--muted);
+  }
+
+  .arch-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.96rem;
+  }
+
+  .arch-dot {
+    width: 9px;
+    height: 9px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  @media (max-width: 840px) {
+    .stats,
+    .how-grid,
+    .res-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .nav {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 1.25rem 0.75rem 2rem;
+    }
+
+    .app {
+      padding: 1.5rem;
+    }
+
+    .nav {
+      gap: 0.5rem;
+    }
+  }
 </style>
 
 <div class="app">
   <script>
+    function updateThemeButton() {
+      const btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      btn.textContent = document.body.classList.contains('dark-mode') ? 'Light mode' : 'Dark mode';
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      localStorage.setItem('puente-theme', theme);
+      updateThemeButton();
+    }
+
+    function toggleTheme() {
+      applyTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark');
+    }
+
     window.showTab = function(id, btn) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -87,6 +825,10 @@
       if (tab) tab.classList.add('active');
       if (btn) btn.classList.add('active');
     };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTheme(localStorage.getItem('puente-theme') || 'light');
+    });
   </script>
 
   <div style="padding:1rem 0 .5rem;display:flex;align-items:center;justify-content:space-between">
@@ -97,7 +839,10 @@
         <div style="font-size:11px;color:var(--color-text-secondary)">El Paso · Ciudad Juárez</div>
       </div>
     </div>
-    <div style="font-size:11px;color:var(--color-text-secondary);text-align:right">BorderHack 2026<br>Community Impact Track</div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.45rem">
+      <div style="font-size:11px;color:var(--color-text-secondary);text-align:right">BorderHack 2026<br>Community Impact Track</div>
+      <button id="theme-toggle" class="theme-btn" type="button" onclick="toggleTheme()">Dark mode</button>
+    </div>
   </div>
 
   <div class="nav">
@@ -145,7 +890,7 @@
       <div style="font-size:13px;font-weight:500;margin-bottom:2px">Google technology stack</div>
       <div style="font-size:12px;color:var(--color-text-secondary)">Built entirely on Google developer tools per Solution Challenge guidelines</div>
       <div class="tech-pills">
-        <span class="pill">Gemini 1.5 Flash</span>
+        <span class="pill">Gemini 2.5 Flash</span>
         <span class="pill">Firebase Realtime DB</span>
         <span class="pill">Google Maps Platform</span>
         <span class="pill">Flutter (mobile)</span>
@@ -159,7 +904,7 @@
   <div id="tab-assistant" class="tab">
     <div style="margin-bottom:1rem">
       <div style="font-size:13px;font-weight:500;margin-bottom:4px">Bilingual AI resource assistant</div>
-      <div style="font-size:12px;color:var(--color-text-secondary)">Ask about healthcare, legal aid, education, jobs, or any community resource — in English or Spanish. Powered by Gemini 1.5 Flash.</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Ask about healthcare, legal aid, education, jobs, or any community resource — in English or Spanish. Powered by Gemini 2.5 Flash.</div>
     </div>
     <div class="chat-wrap">
       <div class="chat-head">
@@ -342,8 +1087,8 @@ renderResources();
 
 const pitchSections=[
   {title:'1. Problem statement',body:`<strong>The challenge:</strong> 2.1 million people live in the El Paso–Ciudad Juárez binational metro — one of the largest on Earth. Yet community services (healthcare, legal aid, food, education, jobs) are scattered across incompatible systems, two languages, and two national bureaucracies.<br><br><strong>Who is affected:</strong> First-generation immigrants, cross-border workers, low-income families, seniors, and small business owners who need services but can't navigate fragmented information.<br><br><strong>Why it matters:</strong> People in crisis don't have time to call 12 different phone numbers. They need one trusted, bilingual guide that knows the border.`},
-  {title:'2. Solution overview',body:`<strong>Puente</strong> (Spanish for "bridge") is a bilingual AI-powered platform that acts as a knowledgeable community guide. Users describe their situation in English or Spanish and receive tailored, specific guidance — not generic links.<br><br>Core capabilities:<br>• Bilingual conversational AI (Gemini 1.5) with border-specific knowledge<br>• Curated, verified resource directory with real-time updates (Firebase)<br>• Google Maps integration for location-aware recommendations<br>• Mobile-first (Flutter) with offline fallback for low-connectivity areas`},
-  {title:'3. Technical architecture',body:`<div class="arch-row"><div class="arch-dot" style="background:#1D9E75"></div><strong>Frontend:</strong> Flutter (Android/iOS) + Angular web app — single codebase, shared components</div><div class="arch-row"><div class="arch-dot" style="background:#378ADD"></div><strong>AI layer:</strong> Gemini 1.5 Flash via Vertex AI — system-prompted with regional resource knowledge, bilingual instruction tuning</div><div class="arch-row"><div class="arch-dot" style="background:#BA7517"></div><strong>Data:</strong> Firebase Realtime Database for live resource updates + Firebase Auth for org admin accounts</div><div class="arch-row"><div class="arch-dot" style="background:#D85A30"></div><strong>Analytics:</strong> BigQuery + Looker Studio dashboard for tracking most-needed resources (privacy-preserving, aggregated)</div><div class="arch-row"><div class="arch-dot" style="background:#7F77DD"></div><strong>Maps:</strong> Google Maps Platform for proximity search and directions to services</div>`},
+  {title:'2. Solution overview',body:`<strong>Puente</strong> (Spanish for "bridge") is a bilingual AI-powered platform that acts as a knowledgeable community guide. Users describe their situation in English or Spanish and receive tailored, specific guidance — not generic links.<br><br>Core capabilities:<br>• Bilingual conversational AI (Gemini 2.5) with border-specific knowledge<br>• Curated, verified resource directory with real-time updates (Firebase)<br>• Google Maps integration for location-aware recommendations<br>• Mobile-first (Flutter) with offline fallback for low-connectivity areas`},
+  {title:'3. Technical architecture',body:`<div class="arch-row"><div class="arch-dot" style="background:#1D9E75"></div><strong>Frontend:</strong> Flutter (Android/iOS) + Angular web app — single codebase, shared components</div><div class="arch-row"><div class="arch-dot" style="background:#378ADD"></div><strong>AI layer:</strong> Gemini 2.5 Flash via Vertex AI — system-prompted with regional resource knowledge, bilingual instruction tuning</div><div class="arch-row"><div class="arch-dot" style="background:#BA7517"></div><strong>Data:</strong> Firebase Realtime Database for live resource updates + Firebase Auth for org admin accounts</div><div class="arch-row"><div class="arch-dot" style="background:#D85A30"></div><strong>Analytics:</strong> BigQuery + Looker Studio dashboard for tracking most-needed resources (privacy-preserving, aggregated)</div><div class="arch-row"><div class="arch-dot" style="background:#7F77DD"></div><strong>Maps:</strong> Google Maps Platform for proximity search and directions to services</div>`},
   {title:'4. Impact metrics & success',body:`<strong>Short-term (3 months after launch):</strong><br>• 500 active monthly users<br>• 80% of queries successfully resolved (user confirms they found what they needed)<br>• 50 community orgs onboarded<br><br><strong>Medium-term (12 months):</strong><br>• 5,000 MAU across El Paso + Juárez<br>• Partnership with EPCC, DMRS, and El Pasoans Fighting Hunger for verified listings<br>• City of El Paso integration for official service updates<br><br><strong>Measurement:</strong> Post-session satisfaction survey (2-tap), resource click-through tracking, quarterly community partner check-ins`},
   {title:'5. Scalability & future',body:`Puente is architected to scale beyond El Paso–Juárez. The core stack (Firebase + Gemini + Google Maps + Flutter) requires only a new regional dataset to deploy in any border community: Laredo–Nuevo Laredo, San Diego–Tijuana, McAllen–Reynosa.<br><br>The AI layer uses retrieval-augmented generation (RAG) — adding a new region means ingesting new resource data, not retraining a model. Firebase handles horizontal scaling automatically. We estimate $0.03/user/month at 10,000 MAU on Firebase Spark + Vertex AI pricing.`},
   {title:'6. Challenges we solved',body:`<strong>Bilingual intent parsing:</strong> Users mix English and Spanish mid-sentence ("I need help with my seguro"). We addressed this by including Gemini's native multilingual capability with a system prompt that explicitly handles Spanglish and code-switching common in border communities.<br><br><strong>Data freshness:</strong> Community orgs change hours and availability constantly. We built a lightweight Firebase admin panel so org staff can update their own listings in 30 seconds — and automated a "stale flag" if a listing hasn't been verified in 30 days.<br><br><strong>Low-connectivity users:</strong> Many users are on limited data plans. The Flutter app caches the top 50 resources offline and uses compressed API payloads.`},
@@ -364,6 +1109,9 @@ function setLang(l){
   currentLang=l;
   document.getElementById('lang-en').classList.toggle('active',l==='en');
   document.getElementById('lang-es').classList.toggle('active',l==='es');
+  document.getElementById('chat-input').placeholder = l === 'es'
+    ? 'Pregunta sobre cualquier recurso en El Paso o Juárez...'
+    : 'Ask about any resource in El Paso or Juárez...';
 }
 
 function showTab(id,btn){
@@ -392,8 +1140,11 @@ async function sendMsg(){
   msgsDiv.innerHTML+=`<div class="msg bot" id="${tid}"><div class="msg-avatar">P</div><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
+    const languageOverride = currentLang === 'es'
+      ? 'Always answer fully in Spanish, regardless of the user input language.'
+      : 'Always answer fully in English, regardless of the user input language.';
     const res=await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -406,9 +1157,9 @@ You are knowledgeable about:
 - Cross-border topics: border crossing wait times, SENTRI/Global Entry, DACA, asylum process, Medicaid/CHIP, WIC, Title 42, CBP One app
 - The border context: code-switching, Spanglish, undocumented residents, mixed-status families, maquiladora workers, UTEP/EPCC students
 
-Always respond in the SAME language the user used. If they mix languages, match their style. Be specific and actionable — give names, addresses, phone numbers, and steps when you can. Keep responses under 200 words. Be warm, non-judgmental, and never ask for documentation status.
+${languageOverride}
 
-If the user writes in Spanish, respond fully in Spanish. If English, respond in English.` }] },
+Be specific and actionable — give names, addresses, phone numbers, and steps when you can. Keep responses under 200 words. Be warm, non-judgmental, and never ask for documentation status.` }] },
           contents: msgs.map(m => ({
             role: m.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: m.content }]
