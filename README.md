@@ -1,21 +1,22 @@
 # Puente
 
-A public-ready hackathon prototype for a bilingual AI assistant connecting El Paso and Ciudad Juárez community resources.
+A public-ready hackathon prototype for a bilingual AI assistant connecting El Paso and Ciudad Juarez community resources.
 
 ## Project structure
 
-- `puente_borderhack_2026.html` — main frontend page, AI/chat UI, Google Maps, and Firestore data loading
-- `src/firebaseConfig.js` — Firebase app initialization using local key imports
-- `src/keys.example.js` — example key file for setup
-- `src/keys.js` — local ignored key file for your secret API keys
-- `.gitignore` — excludes local secret files and editor artifacts
+- `index.html` - main frontend page, AI/chat UI, Google Maps, Firestore data loading, and pitch deck
+- `puente_borderhack_2026.html` - compatibility redirect for older links
+- `src/firebaseConfig.js` - Firebase app initialization using local key imports
+- `src/keys.example.js` - example key file for setup
+- `src/keys.js` - local ignored key file for your secret API keys
+- `.gitignore` - excludes local secret files and editor artifacts
 
 ## Setup
 
 1. Run `npm install`.
 2. Copy `src/keys.example.js` to `src/keys.js`.
 3. Replace placeholder values with your real keys and Firebase config values.
-4. Start a local server and open `puente_borderhack_2026.html`.
+4. Start a local server and open `index.html`.
 
 Example:
 
