@@ -1,0 +1,16 @@
+# Ignore environment files
+.env
+
+# Ignore local browser keys
+src/keys.js
+
+# Ignore Node modules if any are added later
+node_modules/
+
+# Ignore common logs and local editor files
+npm-debug.log*
+.vscode/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db

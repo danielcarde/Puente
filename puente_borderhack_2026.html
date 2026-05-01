@@ -1,0 +1,443 @@
+
+<!-- Google Maps API key is loaded dynamically from ./src/keys.js -->
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font-sans);color:var(--color-text-primary);background:transparent}
+  .app{max-width:700px;margin:0 auto;padding:0 0 2rem}
+  .nav{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem}
+  .nav-btn{padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--color-text-secondary);transition:all .15s}
+  .nav-btn.active{border-bottom-color:var(--color-text-primary);color:var(--color-text-primary)}
+  .nav-btn:hover:not(.active){color:var(--color-text-primary)}
+  .tab{display:none}
+  .tab.active{display:block}
+  .hero{padding:1.5rem 0 1rem}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:var(--color-background-success);color:var(--color-text-success);font-size:11px;font-weight:500;padding:4px 10px;border-radius:var(--border-radius-md);margin-bottom:1rem;letter-spacing:.04em}
+  .hero h1{font-size:28px;font-weight:500;line-height:1.25;margin-bottom:.75rem}
+  .hero h1 span{color:var(--color-text-success)}
+  .hero p{font-size:15px;color:var(--color-text-secondary);line-height:1.7;max-width:580px;margin-bottom:1.25rem}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:1.25rem 0}
+  .stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.85rem 1rem}
+  .stat-n{font-size:22px;font-weight:500;margin-bottom:2px}
+  .stat-l{font-size:12px;color:var(--color-text-secondary);line-height:1.4}
+  .section-title{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--color-text-secondary);text-transform:uppercase;margin-bottom:1rem}
+  .how-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
+  .how-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.1rem}
+  .how-card .icon{width:28px;height:28px;border-radius:var(--border-radius-md);background:var(--color-background-info);display:flex;align-items:center;justify-content:center;margin-bottom:.65rem;font-size:14px}
+  .how-card h4{font-size:13px;font-weight:500;margin-bottom:4px}
+  .how-card p{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+  .tech-bar{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+  .tech-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:.6rem}
+  .pill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:var(--border-radius-md);background:var(--color-background-info);color:var(--color-text-info)}
+  .chat-wrap{display:flex;flex-direction:column;height:480px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)}
+  .chat-head{padding:.85rem 1.1rem;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+  .chat-head-left{display:flex;align-items:center;gap:10px}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:var(--color-text-success)}
+  .chat-head h3{font-size:14px;font-weight:500}
+  .chat-head p{font-size:11px;color:var(--color-text-secondary)}
+  .lang-toggle{display:flex;gap:4px}
+  .lang-btn{font-size:11px;padding:3px 9px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:none;cursor:pointer;color:var(--color-text-secondary)}
+  .lang-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+  .messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+  .msg{display:flex;gap:8px;align-items:flex-end}
+  .msg.user{flex-direction:row-reverse}
+  .msg-bubble{max-width:80%;padding:.6rem .85rem;border-radius:var(--border-radius-lg);font-size:13px;line-height:1.55}
+  .msg.bot .msg-bubble{background:var(--color-background-secondary);color:var(--color-text-primary);border-bottom-left-radius:4px}
+  .msg.user .msg-bubble{background:var(--color-background-info);color:var(--color-text-info);border-bottom-right-radius:4px}
+  .msg-avatar{width:24px;height:24px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--color-text-success);flex-shrink:0}
+  .typing{display:flex;align-items:center;gap:4px;padding:.6rem .85rem;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border-bottom-left-radius:4px;width:fit-content}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--color-text-secondary);animation:blink 1.4s infinite both}
+  .dot:nth-child(2){animation-delay:.2s}
+  .dot:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+  .quick-btns{padding:.65rem 1rem;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:6px;flex-wrap:wrap}
+  .quick-btn{font-size:11px;padding:5px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:none;cursor:pointer;color:var(--color-text-secondary);white-space:nowrap;transition:background .1s}
+  .quick-btn:hover{background:var(--color-background-secondary)}
+  .input-row{display:flex;gap:8px;padding:.75rem 1rem;border-top:0.5px solid var(--color-border-tertiary)}
+  .chat-input{flex:1;padding:8px 12px;font-size:13px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);outline:none;font-family:var(--font-sans)}
+  .chat-input:focus{border-color:var(--color-border-primary)}
+  .send-btn{padding:8px 16px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+  .send-btn:disabled{opacity:.45;cursor:not-allowed}
+  .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+  .res-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.1rem;cursor:pointer;transition:border-color .15s}
+  .res-card:hover{border-color:var(--color-border-primary)}
+  .res-icon{font-size:18px;margin-bottom:.5rem}
+  .res-card h4{font-size:13px;font-weight:500;margin-bottom:3px}
+  .res-card p{font-size:12px;color:var(--color-text-secondary);line-height:1.45;margin-bottom:.6rem}
+  .res-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .tag{font-size:10px;padding:2px 7px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-secondary)}
+  .bilingual-tag{font-size:10px;padding:2px 7px;border-radius:var(--border-radius-md);background:var(--color-background-success);color:var(--color-text-success)}
+  .filter-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+  .filter-btn{font-size:12px;padding:5px 12px;border:0.5px solid var(--color-border-secondary);border-radius:20px;background:none;cursor:pointer;color:var(--color-text-secondary);transition:all .1s}
+  .filter-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary)}
+  .pitch-block{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1rem}
+  .pitch-head{padding:.75rem 1.1rem;background:var(--color-background-secondary);font-size:12px;font-weight:500;color:var(--color-text-secondary);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+  .pitch-body{padding:1rem 1.1rem;font-size:13px;line-height:1.7;color:var(--color-text-secondary);border-top:0.5px solid var(--color-border-tertiary);display:none}
+  .pitch-body.open{display:block}
+  .pitch-body strong{color:var(--color-text-primary);font-weight:500}
+  .arch-row{display:flex;align-items:center;gap:8px;margin-bottom:.5rem;font-size:13px}
+  .arch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+</style>
+
+<div class="app">
+  <div style="padding:1rem 0 .5rem;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;background:var(--color-background-success);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--color-text-success)">P</div>
+      <div>
+        <div style="font-size:15px;font-weight:500">Puente</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">El Paso · Ciudad Juárez</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--color-text-secondary);text-align:right">BorderHack 2026<br>Community Impact Track</div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('overview',this)">Overview</button>
+    <button class="nav-btn" onclick="showTab('assistant',this)">AI Assistant</button>
+    <button class="nav-btn" onclick="showTab('resources',this)">Resources</button>
+    <button class="nav-btn" onclick="showTab('pitch',this)">Pitch Deck</button>
+  </div>
+
+  <div id="tab-overview" class="tab active">
+    <div class="hero">
+      <div class="badge">Borderland Impact Project</div>
+      <h1>Connecting <span>2 million people</span> to the resources they need</h1>
+      <p>The El Paso–Ciudad Juárez metro is one of the largest binational communities on Earth. But healthcare, legal aid, education, and social services are fragmented across two countries, two languages, and two bureaucracies. Most residents don't know what help exists — or how to access it.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n">2.1M</div><div class="stat-l">People in the binational metro area</div></div>
+      <div class="stat"><div class="stat-n">83%</div><div class="stat-l">Residents who are bilingual or Spanish-dominant</div></div>
+      <div class="stat"><div class="stat-n">400+</div><div class="stat-l">Community orgs with no unified digital directory</div></div>
+    </div>
+    <div class="section-title" style="margin-top:1.5rem">How Puente works</div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="icon">💬</div>
+        <h4>Bilingual AI assistant</h4>
+        <p>Ask in English or Spanish. Gemini understands the border context and gives specific, actionable guidance — not generic search results.</p>
+      </div>
+      <div class="how-card">
+        <div class="icon">📍</div>
+        <h4>Smart resource matching</h4>
+        <p>Describe your situation and Puente finds relevant services on both sides of the border, sorted by distance and availability.</p>
+      </div>
+      <div class="how-card">
+        <div class="icon">🏥</div>
+        <h4>Cross-border health nav</h4>
+        <p>Understand your options for affordable care in Juárez vs. El Paso — with clinic hours, cost ranges, and insurance acceptance.</p>
+      </div>
+      <div class="how-card">
+        <div class="icon">⚡</div>
+        <h4>Real-time updates</h4>
+        <p>Firebase keeps resource data current. Orgs update their own listings. Stale info is flagged automatically.</p>
+      </div>
+    </div>
+    <div class="tech-bar">
+      <div style="font-size:13px;font-weight:500;margin-bottom:2px">Google technology stack</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Built entirely on Google developer tools per Solution Challenge guidelines</div>
+      <div class="tech-pills">
+        <span class="pill">Gemini 1.5 Flash</span>
+        <span class="pill">Firebase Realtime DB</span>
+        <span class="pill">Google Maps Platform</span>
+        <span class="pill">Flutter (mobile)</span>
+        <span class="pill">BigQuery</span>
+        <span class="pill">Cloud Run</span>
+        <span class="pill">Firebase Auth</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-assistant" class="tab">
+    <div style="margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">Bilingual AI resource assistant</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">Ask about healthcare, legal aid, education, jobs, or any community resource — in English or Spanish. Powered by Gemini 1.5 Flash.</div>
+    </div>
+    <div class="chat-wrap">
+      <div class="chat-head">
+        <div class="chat-head-left">
+          <div class="avatar">P</div>
+          <div>
+            <h3>Puente Assistant</h3>
+            <p>Knows El Paso &amp; Juárez resources</p>
+          </div>
+        </div>
+        <div class="lang-toggle">
+          <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" id="lang-es" onclick="setLang('es')">ES</button>
+        </div>
+      </div>
+      <div class="messages" id="messages">
+        <div class="msg bot">
+          <div class="msg-avatar">P</div>
+          <div class="msg-bubble">Hi! I'm Puente, your binational community guide. I can help you find healthcare, legal services, education programs, food assistance, and more across El Paso and Ciudad Juárez. What do you need help with today?<br><br><em style="font-size:11px;opacity:.7">¡Hola! También puedo ayudarte en español.</em></div>
+        </div>
+      </div>
+      <div class="quick-btns" id="quick-btns">
+        <button class="quick-btn" onclick="sendQuick('Where can I get affordable dental care?')">Affordable dental care</button>
+        <button class="quick-btn" onclick="sendQuick('Free legal help for immigrants')">Immigration legal aid</button>
+        <button class="quick-btn" onclick="sendQuick('Food assistance near me')">Food assistance</button>
+        <button class="quick-btn" onclick="sendQuick('¿Dónde puedo estudiar inglés gratis?')">Clases de inglés</button>
+      </div>
+      <div class="input-row">
+        <input class="chat-input" id="chat-input" placeholder="Ask about any resource in El Paso or Juárez..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}">
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-resources" class="tab">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem">Community resource directory — click any card to ask the AI for more details</div>
+    <div class="filter-row" id="filters">
+      <button class="filter-btn active" onclick="filterRes('all',this)">All</button>
+      <button class="filter-btn" onclick="filterRes('health',this)">Healthcare</button>
+      <button class="filter-btn" onclick="filterRes('legal',this)">Legal</button>
+      <button class="filter-btn" onclick="filterRes('education',this)">Education</button>
+      <button class="filter-btn" onclick="filterRes('food',this)">Food</button>
+      <button class="filter-btn" onclick="filterRes('jobs',this)">Jobs</button>
+    </div>
+    <div id="map" style="height:300px;border:0.5px solid var(--color-border-tertiary);border-radius:16px;overflow:hidden;margin-bottom:1rem"></div>
+    <div class="res-grid" id="res-grid"></div>
+  </div>
+
+  <div id="tab-pitch" class="tab">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem">Presentation structure for BorderHack judges — click any section to expand</div>
+    <div id="pitch-sections"></div>
+  </div>
+</div>
+
+<script type="module">
+import { db } from './src/firebaseConfig.js';
+import { collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js';
+import { GOOGLE_MAPS_API_KEY, AI_API_KEY } from './src/keys.js';
+
+const categoryIcons = {
+  health: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+  legal: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+  education: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+  food: 'https://maps.google.com/mapfiles/ms/icons/orange-dot.png',
+  jobs: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+};
+
+const fallbackResources = [
+  {id:1,cat:'health',icon:'🏥',name:'Clinicas de Salud del Pueblo',desc:'Federally Qualified Health Center. Sliding-scale fees. Serves uninsured patients in both El Paso and Doña Ana Counties.',tags:['Sliding scale','EP + Juárez'],bilingual:true,lat:31.7579,lng:-106.4384},
+  {id:2,cat:'health',icon:'🦷',name:'UTEP Dental Clinic',desc:'Low-cost dental care by supervised dental students. Accepts uninsured patients and Medicaid.',tags:['Low cost','El Paso'],bilingual:true,lat:31.7719,lng:-106.5058},
+  {id:3,cat:'legal',icon:'⚖️',name:'Diocesan Migrant & Refugee Services',desc:'Free and low-cost immigration legal services. Specializes in asylum, DACA, and family petitions.',tags:['Free','Immigration'],bilingual:true,lat:31.7716,lng:-106.4452},
+  {id:4,cat:'legal',icon:'🏛️',name:'Texas RioGrande Legal Aid',desc:'Free civil legal services for low-income residents. Covers housing, family law, consumer rights, and more.',tags:['Free','Civil law'],bilingual:true,lat:31.7780,lng:-106.4832},
+  {id:5,cat:'education',icon:'📚',name:'El Paso Community College',desc:'Affordable higher ed and workforce training. ESL programs, GED preparation, and career certificates.',tags:['Affordable','ESL available'],bilingual:true,lat:31.7992,lng:-106.3851},
+  {id:6,cat:'education',icon:'🌐',name:'Literacy San Antonio (EP affiliate)',desc:'Free adult literacy and English classes for the community. Flexible scheduling including evenings.',tags:['Free','English/Spanish'],bilingual:true,lat:31.7778,lng:-106.4532},
+  {id:7,cat:'food',icon:'🥗',name:'El Pasoans Fighting Hunger',desc:'Regional food bank serving 71,000+ people weekly. Multiple distribution sites across the metro.',tags:['Free','Weekly'],bilingual:true,lat:31.7712,lng:-106.4487},
+  {id:8,cat:'food',icon:'🫙',name:'Salvation Army El Paso',desc:'Emergency food assistance, shelter, and utility help. No documentation required for emergency food.',tags:['Emergency','No docs'],bilingual:false,lat:31.8129,lng:-106.4695},
+  {id:9,cat:'jobs',icon:'💼',name:'Workforce Solutions Borderplex',desc:'Free job placement, skills training, and unemployment services. Offices in El Paso and online.',tags:['Free','Job training'],bilingual:true,lat:31.8178,lng:-106.4065},
+  {id:10,cat:'jobs',icon:'🚀',name:'UTEP Small Business Dev Center',desc:'Free business counseling and resources for entrepreneurs starting or growing a business on the border.',tags:['Free','Entrepreneurs'],bilingual:true,lat:31.7719,lng:-106.5058},
+];
+
+let activeFilter='all';
+
+function loadGoogleMaps(){
+  if(window.google?.maps) return Promise.resolve();
+  return new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}`;
+    script.async=true;
+    script.onload=resolve;
+    script.onerror=reject;
+    document.head.appendChild(script);
+  });
+}
+
+function initMap(items){
+  if(!window.google?.maps) return;
+  const center = { lat: 31.7619, lng: -106.4850 };
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center,
+    zoom: 11,
+  });
+
+  items.filter(r => typeof r.lat === 'number' && typeof r.lng === 'number').forEach(r => {
+    new google.maps.Marker({
+      position: { lat: r.lat, lng: r.lng },
+      map,
+      title: r.name,
+      icon: {
+        url: categoryIcons[r.cat] || categoryIcons.health,
+        scaledSize: new google.maps.Size(32, 32),
+      },
+    });
+  });
+}
+
+function normalizeResource(resource) {
+  const category = resource.cat || resource.Category || 'other';
+  return {
+    id: resource.id,
+    name: resource.name || resource.Name || 'Unknown resource',
+    cat: category,
+    icon: resource.icon || {
+      health: '🏥',
+      legal: '⚖️',
+      education: '📚',
+      food: '🥗',
+      jobs: '💼',
+    }[category] || '📍',
+    desc: resource.desc || resource.description || resource.Address || '',
+    address: resource.Address || resource.address || '',
+    tags: resource.tags || resource.Tags || [],
+    bilingual: resource.bilingual ?? resource.Bilingual ?? true,
+    lat: resource.lat ?? resource.Lat ?? null,
+    lng: resource.lng ?? resource.Lng ?? null,
+  };
+}
+
+async function fetchResources(category = 'all') {
+  try {
+    const ref = collection(db, 'resources');
+    const q = category === 'all' ? ref : query(ref, where('cat', '==', category));
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => normalizeResource({ id: d.id, ...d.data() }));
+    return docs.length ? docs : fallbackResources.filter(r => category === 'all' || r.cat === category);
+  } catch (error) {
+    return fallbackResources.filter(r => category === 'all' || r.cat === category);
+  }
+}
+
+async function renderResources(){
+  const grid=document.getElementById('res-grid');
+  const items=await fetchResources(activeFilter);
+  await loadGoogleMaps().catch(()=>{});
+  initMap(items);
+  grid.innerHTML=items.map(r=>`
+    <div class="res-card" onclick="askAboutResource('${r.name.replace(/'/g,"\\'")}')">
+      <div class="res-icon">${r.icon}</div>
+      <h4>${r.name}</h4>
+      <p>${(r.desc || r.address || '').replace(/\n/g,'<br>')}</p>
+      <div class="res-meta">
+        ${r.tags?.map(t=>`<span class="tag">${t}</span>`).join('')||''}
+        ${r.bilingual?'<span class="bilingual-tag">Bilingual</span>':''}
+      </div>
+    </div>`).join('');
+}
+function filterRes(cat,btn){
+  activeFilter=cat;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderResources();
+}
+function askAboutResource(name){
+  showTab('assistant',document.querySelector('.nav-btn:nth-child(2)'));
+  setTimeout(()=>{
+    document.getElementById('chat-input').value=`Tell me more about ${name} — hours, how to apply, and what documents I need`;
+    sendMsg();
+  },200);
+}
+renderResources();
+
+const pitchSections=[
+  {title:'1. Problem statement',body:`<strong>The challenge:</strong> 2.1 million people live in the El Paso–Ciudad Juárez binational metro — one of the largest on Earth. Yet community services (healthcare, legal aid, food, education, jobs) are scattered across incompatible systems, two languages, and two national bureaucracies.<br><br><strong>Who is affected:</strong> First-generation immigrants, cross-border workers, low-income families, seniors, and small business owners who need services but can't navigate fragmented information.<br><br><strong>Why it matters:</strong> People in crisis don't have time to call 12 different phone numbers. They need one trusted, bilingual guide that knows the border.`},
+  {title:'2. Solution overview',body:`<strong>Puente</strong> (Spanish for "bridge") is a bilingual AI-powered platform that acts as a knowledgeable community guide. Users describe their situation in English or Spanish and receive tailored, specific guidance — not generic links.<br><br>Core capabilities:<br>• Bilingual conversational AI (Gemini 1.5) with border-specific knowledge<br>• Curated, verified resource directory with real-time updates (Firebase)<br>• Google Maps integration for location-aware recommendations<br>• Mobile-first (Flutter) with offline fallback for low-connectivity areas`},
+  {title:'3. Technical architecture',body:`<div class="arch-row"><div class="arch-dot" style="background:#1D9E75"></div><strong>Frontend:</strong> Flutter (Android/iOS) + Angular web app — single codebase, shared components</div><div class="arch-row"><div class="arch-dot" style="background:#378ADD"></div><strong>AI layer:</strong> Gemini 1.5 Flash via Vertex AI — system-prompted with regional resource knowledge, bilingual instruction tuning</div><div class="arch-row"><div class="arch-dot" style="background:#BA7517"></div><strong>Data:</strong> Firebase Realtime Database for live resource updates + Firebase Auth for org admin accounts</div><div class="arch-row"><div class="arch-dot" style="background:#D85A30"></div><strong>Analytics:</strong> BigQuery + Looker Studio dashboard for tracking most-needed resources (privacy-preserving, aggregated)</div><div class="arch-row"><div class="arch-dot" style="background:#7F77DD"></div><strong>Maps:</strong> Google Maps Platform for proximity search and directions to services</div>`},
+  {title:'4. Impact metrics & success',body:`<strong>Short-term (3 months after launch):</strong><br>• 500 active monthly users<br>• 80% of queries successfully resolved (user confirms they found what they needed)<br>• 50 community orgs onboarded<br><br><strong>Medium-term (12 months):</strong><br>• 5,000 MAU across El Paso + Juárez<br>• Partnership with EPCC, DMRS, and El Pasoans Fighting Hunger for verified listings<br>• City of El Paso integration for official service updates<br><br><strong>Measurement:</strong> Post-session satisfaction survey (2-tap), resource click-through tracking, quarterly community partner check-ins`},
+  {title:'5. Scalability & future',body:`Puente is architected to scale beyond El Paso–Juárez. The core stack (Firebase + Gemini + Google Maps + Flutter) requires only a new regional dataset to deploy in any border community: Laredo–Nuevo Laredo, San Diego–Tijuana, McAllen–Reynosa.<br><br>The AI layer uses retrieval-augmented generation (RAG) — adding a new region means ingesting new resource data, not retraining a model. Firebase handles horizontal scaling automatically. We estimate $0.03/user/month at 10,000 MAU on Firebase Spark + Vertex AI pricing.`},
+  {title:'6. Challenges we solved',body:`<strong>Bilingual intent parsing:</strong> Users mix English and Spanish mid-sentence ("I need help with my seguro"). We addressed this by including Gemini's native multilingual capability with a system prompt that explicitly handles Spanglish and code-switching common in border communities.<br><br><strong>Data freshness:</strong> Community orgs change hours and availability constantly. We built a lightweight Firebase admin panel so org staff can update their own listings in 30 seconds — and automated a "stale flag" if a listing hasn't been verified in 30 days.<br><br><strong>Low-connectivity users:</strong> Many users are on limited data plans. The Flutter app caches the top 50 resources offline and uses compressed API payloads.`},
+];
+const pitchContainer=document.getElementById('pitch-sections');
+pitchSections.forEach((s,i)=>{
+  pitchContainer.innerHTML+=`<div class="pitch-block"><div class="pitch-head" onclick="togglePitch(${i})">${s.title}<span id="arrow-${i}">▸</span></div><div class="pitch-body" id="pb-${i}">${s.body}</div></div>`;
+});
+function togglePitch(i){
+  const b=document.getElementById('pb-'+i);
+  const a=document.getElementById('arrow-'+i);
+  const open=b.classList.toggle('open');
+  a.textContent=open?'▾':'▸';
+}
+
+let currentLang='en';
+function setLang(l){
+  currentLang=l;
+  document.getElementById('lang-en').classList.toggle('active',l==='en');
+  document.getElementById('lang-es').classList.toggle('active',l==='es');
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+const msgs=[];
+let busy=false;
+
+async function sendMsg(){
+  if(busy)return;
+  const inp=document.getElementById('chat-input');
+  const text=inp.value.trim();
+  if(!text)return;
+  inp.value='';
+  appendMsg('user',text);
+  msgs.push({role:'user',content:text});
+  busy=true;
+  document.getElementById('send-btn').disabled=true;
+  document.getElementById('quick-btns').style.display='none';
+  const tid='typing-'+Date.now();
+  const msgsDiv=document.getElementById('messages');
+  msgsDiv.innerHTML+=`<div class="msg bot" id="${tid}"><div class="msg-avatar">P</div><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  try{
+    const res=await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: `You are Puente, a bilingual (English/Spanish) AI assistant for the El Paso–Ciudad Juárez border community. You help residents navigate healthcare, legal aid, education, food assistance, jobs, immigration resources, and small business support across both sides of the border.
+
+You are knowledgeable about:
+- El Paso resources: Clinicas de Salud del Pueblo, UTEP Dental Clinic, Texas RioGrande Legal Aid, Diocesan Migrant & Refugee Services (DMRS), El Pasoans Fighting Hunger Food Bank, Workforce Solutions Borderplex, EPCC, Project Amistad, Sun Metro transit
+- Juárez resources: IMSS, ISSSTE, Seguro Popular replacement (INSABI/IMSS Bienestar), Red Cross Cruz Roja, DIF Juárez, CONAFE
+- Cross-border topics: border crossing wait times, SENTRI/Global Entry, DACA, asylum process, Medicaid/CHIP, WIC, Title 42, CBP One app
+- The border context: code-switching, Spanglish, undocumented residents, mixed-status families, maquiladora workers, UTEP/EPCC students
+
+Always respond in the SAME language the user used. If they mix languages, match their style. Be specific and actionable — give names, addresses, phone numbers, and steps when you can. Keep responses under 200 words. Be warm, non-judgmental, and never ask for documentation status.
+
+If the user writes in Spanish, respond fully in Spanish. If English, respond in English.` }] },
+          contents: msgs.map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.content }]
+          }))
+        })
+      }
+    );
+    const data=await res.json();
+    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text || 'Lo siento — I couldn\'t get a response. Please try again.';
+    document.getElementById(tid)?.remove();
+    appendMsg('bot',reply);
+    msgs.push({role:'assistant',content:reply});
+  }catch(e){
+    document.getElementById(tid)?.remove();
+    appendMsg('bot','Connection error. Please check your network and try again.');
+  }
+  busy=false;
+  document.getElementById('send-btn').disabled=false;
+}
+
+function sendQuick(text){
+  document.getElementById('chat-input').value=text;
+  sendMsg();
+}
+
+function appendMsg(role,text){
+  const div=document.getElementById('messages');
+  const isBot=role==='bot';
+  div.innerHTML+=`<div class="msg ${role}">
+    ${isBot?`<div class="msg-avatar">P</div>`:''}
+    <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
+    ${!isBot?'':''}
+  </div>`;
+  div.scrollTop=div.scrollHeight;
+}
+window.showTab = showTab;
+window.setLang = setLang;
+window.sendMsg = sendMsg;
+window.sendQuick = sendQuick;
+window.filterRes = filterRes;
+window.askAboutResource = askAboutResource;
+window.togglePitch = togglePitch;</script>
