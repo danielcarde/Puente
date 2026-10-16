@@ -14,3 +14,7 @@ npm-debug.log*
 # Ignore OS files
 .DS_Store
 Thumbs.db
+
+.env.*
+!.env.example
+.vercel/
