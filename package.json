@@ -1,12 +1,16 @@
 {
   "name": "puente-borderhack-2026",
   "version": "0.1.0",
-  "description": "Bilingual AI assistant prototype for El Paso and Ciudad Juárez community resources.",
+  "description": "Bilingual AI assistant prototype for El Paso and Ciudad Ju\u00c3\u00a1rez community resources.",
   "type": "module",
   "scripts": {
-    "start": "npx serve ."
+    "start": "node --env-file-if-exists=.env scripts/dev-server.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "firebase": "^12.12.1"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/src/keys.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/src/keys.js",
+      "destination": "/api/blocked"
+    },
+    {
+      "source": "/.env",
+      "destination": "/api/blocked"
+    },
+    {
+      "source": "/server/:path*",
+      "destination": "/api/blocked"
+    },
+    {
+      "source": "/scripts/:path*",
+      "destination": "/api/blocked"
+    }
+  ]
+}
