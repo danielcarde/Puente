@@ -1,1 +1,1 @@
-export default {fetch: async () => new Response('Not found',{status:404})};
+export default {fetch: () => new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}})};
