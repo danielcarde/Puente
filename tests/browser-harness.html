@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Puente rendering checks</title>
+<h1>Safe rendering check</h1><label>Test text <input id="value"></label><button id="render">Render text</button>
+<div id="messages"></div><div id="resources"></div>
+<script type="module">
+import {appendChatMessage,renderResourceCards} from '/src/safeRender.js';
+document.querySelector('#render').addEventListener('click',()=>{
+ const text=document.querySelector('#value').value;
+ appendChatMessage(document.querySelector('#messages'),'user',text);
+ renderResourceCards(document.querySelector('#resources'),[{name:text,desc:text,tags:[text]}],()=>{});
+});
+</script></html>

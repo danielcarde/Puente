@@ -962,7 +962,8 @@
 <script type="module">
 import { db } from './src/firebaseConfig.js';
 import { collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js';
-import { GOOGLE_MAPS_API_KEY, AI_API_KEY } from './src/keys.js';
+import { GOOGLE_MAPS_API_KEY } from './src/browserConfig.js';
+import { renderResourceCards, appendChatMessage } from './src/safeRender.js';
 
 const categoryIcons = {
   health: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
@@ -989,6 +990,7 @@ let activeFilter='all';
 
 function loadGoogleMaps(){
   if(window.google?.maps) return Promise.resolve();
+  if (!GOOGLE_MAPS_API_KEY) return Promise.reject(new Error('Maps not configured'));
   return new Promise((resolve,reject)=>{
     const script=document.createElement('script');
     script.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}`;
@@ -1044,6 +1046,7 @@ function normalizeResource(resource) {
 
 async function fetchResources(category = 'all') {
   try {
+    if (!db) return fallbackResources.filter(r => category === 'all' || r.cat === category);
     const ref = collection(db, 'resources');
     const q = category === 'all' ? ref : query(ref, where('cat', '==', category));
     const snap = await getDocs(q);
@@ -1059,16 +1062,7 @@ async function renderResources(){
   const items=await fetchResources(activeFilter);
   await loadGoogleMaps().catch(()=>{});
   initMap(items);
-  grid.innerHTML=items.map(r=>`
-    <div class="res-card" onclick="askAboutResource('${r.name.replace(/'/g,"\\'")}')">
-      <div class="res-icon">${r.icon}</div>
-      <h4>${r.name}</h4>
-      <p>${(r.desc || r.address || '').replace(/\n/g,'<br>')}</p>
-      <div class="res-meta">
-        ${r.tags?.map(t=>`<span class="tag">${t}</span>`).join('')||''}
-        ${r.bilingual?'<span class="bilingual-tag">Bilingual</span>':''}
-      </div>
-    </div>`).join('');
+  renderResourceCards(grid, items, askAboutResource);
 }
 function filterRes(cat,btn){
   activeFilter=cat;
@@ -1086,12 +1080,12 @@ function askAboutResource(name){
 renderResources();
 
 const pitchSections=[
-  {title:'1. Problem statement',body:`<strong>The challenge:</strong> 2.1 million people live in the El Paso–Ciudad Juárez binational metro — one of the largest on Earth. Yet community services (healthcare, legal aid, food, education, jobs) are scattered across incompatible systems, two languages, and two national bureaucracies.<br><br><strong>Who is affected:</strong> First-generation immigrants, cross-border workers, low-income families, seniors, and small business owners who need services but can't navigate fragmented information.<br><br><strong>Why it matters:</strong> People in crisis don't have time to call 12 different phone numbers. They need one trusted, bilingual guide that knows the border.`},
-  {title:'2. Solution overview',body:`<strong>Puente</strong> (Spanish for "bridge") is a bilingual AI-powered platform that acts as a knowledgeable community guide. Users describe their situation in English or Spanish and receive tailored, specific guidance — not generic links.<br><br>Core capabilities:<br>• Bilingual conversational AI (Gemini 2.5) with border-specific knowledge<br>• Curated, verified resource directory with real-time updates (Firebase)<br>• Google Maps integration for location-aware recommendations<br>• Mobile-first (Flutter) with offline fallback for low-connectivity areas`},
-  {title:'3. Technical architecture',body:`<div class="arch-row"><div class="arch-dot" style="background:#1D9E75"></div><strong>Frontend:</strong> Flutter (Android/iOS) + Angular web app — single codebase, shared components</div><div class="arch-row"><div class="arch-dot" style="background:#378ADD"></div><strong>AI layer:</strong> Gemini 2.5 Flash via Vertex AI — system-prompted with regional resource knowledge, bilingual instruction tuning</div><div class="arch-row"><div class="arch-dot" style="background:#BA7517"></div><strong>Data:</strong> Firebase Realtime Database for live resource updates + Firebase Auth for org admin accounts</div><div class="arch-row"><div class="arch-dot" style="background:#D85A30"></div><strong>Analytics:</strong> BigQuery + Looker Studio dashboard for tracking most-needed resources (privacy-preserving, aggregated)</div><div class="arch-row"><div class="arch-dot" style="background:#7F77DD"></div><strong>Maps:</strong> Google Maps Platform for proximity search and directions to services</div>`},
-  {title:'4. Impact metrics & success',body:`<strong>Short-term (3 months after launch):</strong><br>• 500 active monthly users<br>• 80% of queries successfully resolved (user confirms they found what they needed)<br>• 50 community orgs onboarded<br><br><strong>Medium-term (12 months):</strong><br>• 5,000 MAU across El Paso + Juárez<br>• Partnership with EPCC, DMRS, and El Pasoans Fighting Hunger for verified listings<br>• City of El Paso integration for official service updates<br><br><strong>Measurement:</strong> Post-session satisfaction survey (2-tap), resource click-through tracking, quarterly community partner check-ins`},
-  {title:'5. Scalability & future',body:`Puente is architected to scale beyond El Paso–Juárez. The core stack (Firebase + Gemini + Google Maps + Flutter) requires only a new regional dataset to deploy in any border community: Laredo–Nuevo Laredo, San Diego–Tijuana, McAllen–Reynosa.<br><br>The AI layer uses retrieval-augmented generation (RAG) — adding a new region means ingesting new resource data, not retraining a model. Firebase handles horizontal scaling automatically. We estimate $0.03/user/month at 10,000 MAU on Firebase Spark + Vertex AI pricing.`},
-  {title:'6. Challenges we solved',body:`<strong>Bilingual intent parsing:</strong> Users mix English and Spanish mid-sentence ("I need help with my seguro"). We addressed this by including Gemini's native multilingual capability with a system prompt that explicitly handles Spanglish and code-switching common in border communities.<br><br><strong>Data freshness:</strong> Community orgs change hours and availability constantly. We built a lightweight Firebase admin panel so org staff can update their own listings in 30 seconds — and automated a "stale flag" if a listing hasn't been verified in 30 days.<br><br><strong>Low-connectivity users:</strong> Many users are on limited data plans. The Flutter app caches the top 50 resources offline and uses compressed API payloads.`},
+  {title:'1. Prototype purpose',body:'Puente explores a bilingual interface for finding community resources in the El Paso-Ciudad Juarez area. Resource details in the prototype require verification with the named organizations.'},
+  {title:'2. Current implementation',body:'The repository contains a static HTML/CSS/JavaScript interface, Firestore resource reads with local fallback examples, optional Google Maps integration, and a server-side Gemini chat endpoint.'},
+  {title:'3. Team contributions',body:'Built as a GDG BorderHack 2026 team project. Daniel Adrian Cardenas contributed to Firebase data loading and Google Maps integration. This prototype is team work.'},
+  {title:'4. Validation',body:'Local automated checks cover the chat request boundary and safe text rendering. No user-adoption, model-accuracy, cost, or service-availability results are claimed.'},
+  {title:'5. Planned concepts',body:'Mobile applications, offline caching, organization administration, retrieval-augmented generation, and analytics are future concepts. They are not implemented in this repository.'},
+  {title:'6. Operational limits',body:'Live chat requires server configuration. Browser Maps settings and Firestore access rules require provider-side restrictions. The project remains a prototype.'},
 ];
 const pitchContainer=document.getElementById('pitch-sections');
 pitchSections.forEach((s,i)=>{
@@ -1140,35 +1134,14 @@ async function sendMsg(){
   msgsDiv.innerHTML+=`<div class="msg bot" id="${tid}"><div class="msg-avatar">P</div><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
-    const languageOverride = currentLang === 'es'
-      ? 'Always answer fully in Spanish, regardless of the user input language.'
-      : 'Always answer fully in English, regardless of the user input language.';
-    const res=await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: `You are Puente, a bilingual (English/Spanish) AI assistant for the El Paso–Ciudad Juárez border community. You help residents navigate healthcare, legal aid, education, food assistance, jobs, immigration resources, and small business support across both sides of the border.
-
-You are knowledgeable about:
-- El Paso resources: Clinicas de Salud del Pueblo, UTEP Dental Clinic, Texas RioGrande Legal Aid, Diocesan Migrant & Refugee Services (DMRS), El Pasoans Fighting Hunger Food Bank, Workforce Solutions Borderplex, EPCC, Project Amistad, Sun Metro transit
-- Juárez resources: IMSS, ISSSTE, Seguro Popular replacement (INSABI/IMSS Bienestar), Red Cross Cruz Roja, DIF Juárez, CONAFE
-- Cross-border topics: border crossing wait times, SENTRI/Global Entry, DACA, asylum process, Medicaid/CHIP, WIC, Title 42, CBP One app
-- The border context: code-switching, Spanglish, undocumented residents, mixed-status families, maquiladora workers, UTEP/EPCC students
-
-${languageOverride}
-
-Be specific and actionable — give names, addresses, phone numbers, and steps when you can. Keep responses under 200 words. Be warm, non-judgmental, and never ask for documentation status.` }] },
-          contents: msgs.map(m => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.content }]
-          }))
-        })
-      }
-    );
-    const data=await res.json();
-    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text || 'Lo siento — I couldn\'t get a response. Please try again.';
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({language: currentLang, messages: msgs.slice(-12)})
+    });
+    if (!res.ok) throw new Error('Chat request failed');
+    const data = await res.json();
+    const reply = typeof data.reply === 'string' ? data.reply : 'No response was returned.';
     document.getElementById(tid)?.remove();
     appendMsg('bot',reply);
     msgs.push({role:'assistant',content:reply});
@@ -1186,15 +1159,9 @@ function sendQuick(text){
 }
 
 function appendMsg(role,text){
-  const div=document.getElementById('messages');
-  const isBot=role==='bot';
-  div.innerHTML+=`<div class="msg ${role}">
-    ${isBot?`<div class="msg-avatar">P</div>`:''}
-    <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
-    ${!isBot?'':''}
-  </div>`;
-  div.scrollTop=div.scrollHeight;
+  appendChatMessage(document.getElementById('messages'), role, text);
 }
+
 window.showTab = showTab;
 window.setLang = setLang;
 window.sendMsg = sendMsg;
